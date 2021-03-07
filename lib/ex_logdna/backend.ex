@@ -3,11 +3,19 @@ defmodule LogDNA.Backend do
   import LogDNA.Config
   alias LogDNA.{Formatter, Ingestion}
 
-  defstruct level: :debug, metadata: []
+  defstruct level: :debug,
+            metadata: [],
+            ingestion_key: nil
 
   def init(__MODULE__) do
-    HTTPoison.start()
-    {:ok, initial_state()}
+    case initial_state() do
+      %__MODULE__{ingestion_key: nil} ->
+        {:error, "No LogDNA ingestion key configured"}
+
+      state ->
+        HTTPoison.start()
+        {:ok, state}
+    end
   end
 
   # Not buffering anything, no-op
@@ -31,6 +39,7 @@ defmodule LogDNA.Backend do
   end
 
   defp message(msg) when is_binary(msg), do: msg
+  defp message(msg) when is_list(msg), do: to_string(msg)
   defp message(msg), do: inspect(msg)
 
   def handle_call(_request, state) do
@@ -40,6 +49,7 @@ defmodule LogDNA.Backend do
 
   defp initial_state() do
     %__MODULE__{
+      ingestion_key: logdna_config(:ingestion_key),
       metadata: logger_config(:metadata, [])
     }
   end
