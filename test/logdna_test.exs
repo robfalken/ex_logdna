@@ -1,5 +1,5 @@
-defmodule LogDNA.BackendTest do
-  alias LogDNA.{Backend, State}
+defmodule LogDNATest do
+  alias LogDNA.{State}
   use ExUnit.Case
   import Mox
 
@@ -26,10 +26,12 @@ defmodule LogDNA.BackendTest do
                  params: %{},
                  url: "https://logs.logdna.com/logs/ingest"
                }
+
+        {:ok, %HTTPoison.Response{}}
       end)
 
       assert {:ok, returned_state} =
-               Backend.handle_event(
+               LogDNA.handle_event(
                  {:info, group_leader, {Logger, "Message", timestamp, [event: "an event"]}},
                  state
                )

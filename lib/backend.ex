@@ -1,4 +1,4 @@
-defmodule LogDNA.Backend do
+defmodule LogDNA do
   @behaviour :gen_event
   import LogDNA.Config
   alias LogDNA.{Formatter, Ingestion, State}
