@@ -18,8 +18,12 @@ defmodule LogDNA.Backend do
     end
   end
 
-  # Not buffering anything, no-op
+  # We're not buffering anything, so this is a no-op
   def handle_event(:flush, state), do: {:ok, state}
+
+  # It is recommended that handlers ignore messages
+  # where the group leader is in a different node
+  # than the one where the handler is installed
   def handle_event({_, gl, {_, _, _, _}}, state) when node(gl) != node(), do: {:ok, state}
 
   def handle_event(
@@ -38,6 +42,7 @@ defmodule LogDNA.Backend do
     {:ok, state}
   end
 
+  @spec message(any()) :: String.t()
   defp message(msg) when is_binary(msg), do: msg
   defp message(msg) when is_list(msg), do: to_string(msg)
   defp message(msg), do: inspect(msg)
@@ -54,8 +59,5 @@ defmodule LogDNA.Backend do
     }
   end
 
-  defp whitelist_metadata(metadata, state) do
-    metadata
-    |> Keyword.take(state.metadata)
-  end
+  defp whitelist_metadata(metadata, state), do: Keyword.take(metadata, state.metadata)
 end
