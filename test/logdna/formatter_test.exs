@@ -43,6 +43,14 @@ defmodule LogDNA.FormatterTest do
       assert line[:meta][:event] == %{json: true}
     end
 
+    test "Can handle list of codepoints" do
+      {_, body} = Formatter.format_event(:info, [121, 101, 115], @datetime, event: %{json: true})
+
+      [line | _] = body[:lines]
+
+      assert line[:line] == 'yes'
+    end
+
     test "merges tags" do
       {params, _} =
         Formatter.format_event(:info, "Message.", @datetime, tags: ~w[additional extra])
