@@ -1,9 +1,10 @@
 defmodule LogDNA.Ingestion do
-  import LogDNA.Config
+  alias LogDNA.State
   @ingestion_url "https://logs.logdna.com/logs/ingest"
 
-  def prepare_request({params, body}) do
-    credentials = logdna_config(:ingestion_key, "") |> Base.encode64()
+  @spec prepare_request({map(), map()}, %State{}) :: %HTTPoison.Request{}
+  def prepare_request({params, body}, state) do
+    credentials = state.ingestion_key |> Base.encode64()
 
     %HTTPoison.Request{
       method: :post,
@@ -18,6 +19,7 @@ defmodule LogDNA.Ingestion do
     }
   end
 
+  @spec post_request(%HTTPoison.Request{}) :: {:ok, %HTTPoison.Response{}} | {:error, any()}
   def post_request(request) do
     request
     |> HTTPoison.request()

@@ -1,15 +1,11 @@
 defmodule LogDNA.Backend do
   @behaviour :gen_event
   import LogDNA.Config
-  alias LogDNA.{Formatter, Ingestion}
-
-  defstruct level: :debug,
-            metadata: [],
-            ingestion_key: nil
+  alias LogDNA.{Formatter, Ingestion, State}
 
   def init(__MODULE__) do
     case initial_state() do
-      %__MODULE__{ingestion_key: nil} ->
+      %State{ingestion_key: nil} ->
         {:error, "No LogDNA ingestion key configured"}
 
       state ->
@@ -35,7 +31,7 @@ defmodule LogDNA.Backend do
       message = message(msg)
 
       Formatter.format_event(level, message, timestamp, metadata)
-      |> Ingestion.prepare_request()
+      |> Ingestion.prepare_request(state)
       |> Ingestion.post_request()
     end
 
@@ -53,7 +49,7 @@ defmodule LogDNA.Backend do
   end
 
   defp initial_state() do
-    %__MODULE__{
+    %State{
       ingestion_key: logdna_config(:ingestion_key),
       metadata: logger_config(:metadata, [])
     }
