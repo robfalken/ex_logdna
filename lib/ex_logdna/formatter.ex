@@ -4,20 +4,22 @@ defmodule LogDNA.Formatter do
   def format_event(level, message, datetime, metadata) do
     {tags, metadata} = Keyword.pop(metadata, :tags, [])
 
-    tags = merge_tags(tags)
+    params =
+      %{
+        tags: merge_tags(tags),
+        hostname: logdna_config(:hostname, "")
+      }
+      |> filter_empty()
 
-    params = %{
-      tags: tags,
-      hostname: logdna_config(:hostname, "")
-    }
-
-    line = %{
-      app: logdna_config(:app),
-      level: level,
-      line: message,
-      meta: meta(metadata),
-      timestamp: timestamp(datetime)
-    }
+    line =
+      %{
+        app: logdna_config(:app),
+        level: level,
+        line: message,
+        meta: meta(metadata),
+        timestamp: timestamp(datetime)
+      }
+      |> filter_empty()
 
     body = %{lines: [line]}
 
@@ -31,6 +33,8 @@ defmodule LogDNA.Formatter do
     |> DateTime.from_naive!(timezone())
     |> DateTime.to_unix()
   end
+
+  def meta([]), do: nil
 
   def meta(metadata) do
     metadata
@@ -57,4 +61,14 @@ defmodule LogDNA.Formatter do
   end
 
   defp timezone(), do: logdna_config(:timezone, "Etc/UTC")
+
+  def filter_empty(map) do
+    map
+    |> Enum.filter(&present?/1)
+    |> Enum.into(%{})
+  end
+
+  defp present?({_, ""}), do: false
+  defp present?({_, nil}), do: false
+  defp present?({_, _}), do: true
 end
