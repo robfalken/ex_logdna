@@ -32,6 +32,8 @@ config :ex_logdna,
   tags: ["web", "prod"]
 ```
 
+Find more information in the [LogDNA ingestion API documentation](https://docs.logdna.com/reference#logsingest).
+
 ## Usage
 
 After configuring your application to use the `LogDNA` backend, just use logger as you normally would. To send a log entry with log level `info` for instance:
@@ -54,3 +56,9 @@ Some metadata properties are reserved for magic.
 #### Tags
 
 If you pass in `tags` with your log entry, it won't be sent in as metadata, but as native LogDNA tags.
+
+```elixir
+Logger.info("Logging stuff to LogDNA with additional metadata.", tags: ["one", "two"])
+```
+
+Should you have configured global tags in your config file, these event tags will be merged into the global tags, and they are all passed along to the ingestion API.
