@@ -1,3 +1,5 @@
+![CircleCI status badge](https://circleci.com/gh/robertfalken/ex_logdna.svg?style=shield&circle-token=fbc07c0c1283759331039b12a186caeab0d97518)
+
 # Elixir logger backend for LogDNA
 
 A logger backend for elixir to send application logs to [LogDNA](https://www.logdna.com) through their ingestion API.
@@ -41,7 +43,6 @@ After configuring your application to use the `LogDNA` backend, just use logger 
 ```elixir
 Logger.info("Logging stuff to LogDNA")
 ```
-
 
 The backend has support for metadata, just pass it on as the second argument:
 
